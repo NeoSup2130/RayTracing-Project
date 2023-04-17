@@ -9,3 +9,9 @@ There are three projects which are:
 This project was written within 8 weeks.
 
 I advise to build and run the project in 64x release mode.
+
+The controls are:
+- WASD to move the camera
+- Z and X to rotate the camera left or right
+- R and F to move the camera up or down
+- Q to quit the application

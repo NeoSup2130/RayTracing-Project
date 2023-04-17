@@ -28,6 +28,9 @@
     <ClCompile Include="Material.cpp">
       <Filter>Primitives_System</Filter>
     </ClCompile>
+    <ClCompile Include="Scene.cpp">
+      <Filter>Scene</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="RayTracer.h">
@@ -57,6 +60,9 @@
     <ClInclude Include="Material.h">
       <Filter>Primitives_System</Filter>
     </ClInclude>
+    <ClInclude Include="Scene.h">
+      <Filter>Scene</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Ray_System">
@@ -73,6 +79,9 @@
     </Filter>
     <Filter Include="Primitives_System">
       <UniqueIdentifier>{2a9e035e-a445-4e6f-84c8-d593efe89fc9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Scene">
+      <UniqueIdentifier>{96116e1c-2b51-4b87-a7a1-9b27965647ed}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

@@ -92,3 +92,12 @@ RayTracer/Release/vc142.pdb
 MyMathLibrary/MyMathLibrary.idb
 MyMathLibrary/MyMathLibrary.idb
 MyMathLibrary/MyMathLibrary.idb
+*.iobj
+*.obj
+*.pdb
+*.exe
+*.recipe
+*.ipdb
+*.log
+*.tlog
+*.ipch

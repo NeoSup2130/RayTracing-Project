@@ -32,6 +32,7 @@
     <ClCompile Include="Primitives.cpp" />
     <ClCompile Include="Ray.cpp" />
     <ClCompile Include="RayTracer.cpp" />
+    <ClCompile Include="Scene.cpp" />
     <ClCompile Include="Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -43,6 +44,7 @@
     <ClInclude Include="Primitives.h" />
     <ClInclude Include="Ray.h" />
     <ClInclude Include="RayTracer.h" />
+    <ClInclude Include="Scene.h" />
     <ClInclude Include="Screen.h" />
   </ItemGroup>
   <ItemGroup>

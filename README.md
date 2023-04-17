@@ -7,3 +7,5 @@ There are three projects which are:
 - The unit test project for testing custom math functions
 
 This project was written within 8 weeks.
+
+I advise to build and run the project in 64x release mode.

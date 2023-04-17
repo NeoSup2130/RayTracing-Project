@@ -2,6 +2,7 @@
 #include "RayTracer.h"
 #include "Primitives.h"
 #include "Material.h"
+#include "Scene.h"
 
 //Preproccer
 #define SHOW_NORMAL_COLORS false
@@ -21,18 +22,6 @@ using namespace SlavMath;
 
 void RayTracer::Init()
 {
-	m_PrimList = new Primitives * [TEMP_SIZE];
-	m_LigthList = new LightObject * [TEMP_SIZE];
-
-	for (int i = 0; i < TEMP_SIZE; i++)
-	{
-		m_PrimList[i] = nullptr;
-		m_LigthList[i] = nullptr;
-	}
-
-	m_MaterialSystem = new MaterialSystem();
-
-	SceneCreation();
 }
 
 void RayTracer::SetScreen(Screen* screen)
@@ -43,6 +32,11 @@ void RayTracer::SetScreen(Screen* screen)
 void RayTracer::SetCamera(Camera* camera)
 {
 	m_Camera = camera;
+}
+
+void RayTracer::SetScene(const SceneData* scene)
+{
+	m_Scene = scene;
 }
 
 void RayTracer::SetAccumulator(SlavMath::Vector3* accumulator)
@@ -64,8 +58,8 @@ void RayTracer::CastRay(Ray& a_Ray)
 {
 	for (int i = 0; i < TEMP_SIZE; i++)
 	{
-		if (m_PrimList[i] == nullptr) break;
-		m_PrimList[i]->IntersectionRay(a_Ray);
+		if (m_Scene->m_PrimList[i] == nullptr) break;
+		m_Scene->m_PrimList[i]->IntersectionRay(a_Ray);
 	}
 }
 
@@ -173,12 +167,12 @@ void RayTracer::Illumination(Ray& a_Ray, SlavMath::Color& a_Emittance)
 
 	for (int i = 0; i < TEMP_SIZE; i++)
 	{
-		if (m_LigthList[i] == nullptr) break;
+		if (m_Scene->m_LigthList[i] == nullptr) break;
 		//If normal dot light dir < 0, then shadowed
 #if USE_SOFT_SHADOWS
-		m_Length = m_LigthList[i]->GetPointOnArea(m_Generator->GetUniformFloat(), m_Generator->GetUniformFloat()) - m_HitPoint;
+		m_Length = m_Scene->m_LigthList[i]->GetPointOnArea(m_Generator->GetUniformFloat(), m_Generator->GetUniformFloat()) - m_HitPoint;
 #else
-		m_Length = m_LigthList[i]->GetPosition() - m_HitPoint;
+		m_Length = m_Scene->m_LigthList[i]->GetPosition() - m_HitPoint;
 #endif
 		m_Direction = m_Length.normalized();
 		m_NdotL = dot(a_Ray.GetObject()->GetNormal(a_Ray), m_Direction);
@@ -186,11 +180,11 @@ void RayTracer::Illumination(Ray& a_Ray, SlavMath::Color& a_Emittance)
 		{
 			if (!Occluded(m_HitPoint, m_Direction, m_Length.magnitude() - 2 * EPSILON))
 			{
-				a_Emittance += m_LigthList[i]->GetColor() * m_NdotL * (1.0f / dot(m_Length, m_Length));
+				a_Emittance += m_Scene->m_LigthList[i]->GetColor() * m_NdotL * (1.0f / dot(m_Length, m_Length));
 			}
 			else if (m_ShadowRay.GetObject()->IsDieletric())
 			{
-				a_Emittance += 0.5f * (m_LigthList[i]->GetColor() * m_NdotL * (1.0f / dot(m_Length, m_Length)));
+				a_Emittance += 0.5f * (m_Scene->m_LigthList[i]->GetColor() * m_NdotL * (1.0f / dot(m_Length, m_Length)));
 			}
 
 		} 
@@ -204,10 +198,10 @@ bool RayTracer::Occluded(const Point3D& a_Origin, const Vector3& a_Direction, co
 	
 	for (int i = 0; i < TEMP_SIZE; i++)
 	{
-		if (m_PrimList[i] == nullptr) break;
+		if (m_Scene->m_PrimList[i] == nullptr) break;
 		if (m_PrimaryRay.GetObject()->IsDieletric()) continue;
 		//if (m_PrimList[i]->IsDieletric()) continue;
-		m_PrimList[i]->IntersectionRay(m_ShadowRay);
+		m_Scene->m_PrimList[i]->IntersectionRay(m_ShadowRay);
 		if (m_ShadowRay.hasHitObject())
 			return true;
 	}
@@ -282,96 +276,51 @@ void RayTracer::HandleBufferFilter()
 	}
 }
 
-void RayTracer::SceneCreation()
-{
-	AddSphere(Vector3(0, 0, 0), 50.0f, Materials::CYAN);
-	AddRectLight(Point3D(0, 25.0f, 0), Vector2(10, 10), Vector3{ 0,1,0 }, Color{ 1500 });
-	AddRectLight(Point3D(0, 20.0f, -20), Vector2(10, 10), Vector3{ 0,0,1 }, Color{ 1000 });
+//void RayTracer::SceneCreation()
+//{
+//	AddSphere(Vector3(0, 0, 0), 50.0f, Materials::CYAN);
+//	AddRectLight(Point3D(0, 25.0f, 0), Vector2(10, 10), Vector3{ 0,1,0 }, Color{ 1500 });
+//	AddRectLight(Point3D(0, 20.0f, -20), Vector2(10, 10), Vector3{ 0,0,1 }, Color{ 1000 });
+//
+//	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::SHINE, true);
+//	AddPlane(Vector3(0, 0, 1), 3.0f, Materials::MIRROR, false);
+//	AddPlane(Vector3(1, 0, 0), 4.0f, Materials::MIRROR, false);
+//
+//	AddCube(Vector3(-2, 0, 2), Vector3(0.5f, 1, 0.5f), Matrix3().getIdentity(), Materials::FALSEMIRROR);
+//
+//	Matrix3 angle; angle.setToRotationY(30);
+//	AddCube(Vector3(0, 0, 4), Vector3(0.8f, 2, 0.8f), angle, Materials::GLASS);
+//	AddCube(Vector3(0, 0.705f, 4), Vector3(0.65f, 1.3f, 0.65f), angle, Materials::WATER);
+//	angle.setToIdentity();
+//	angle.setToRotationZ(20);
+//	AddCube(Vector3(0, 1.2f, 4), Vector3(0.1f, 1.7f, 0.1f), angle, Materials::YELLOW);
+//	AddSphere(Vector3(-0.6f, 3.0f, 4), 0.5f, Materials::COBALT);
+//
+//#if SHOW_SHADOWS 
+//	//AddRectLight(Point3D(2, 6, 2), Vector2(5.0f, 5.0f), Vector3{ 2,1,0 }.normalized(), Color{ 60 });
+//#endif
+//	//CornellBox();
+//}
 
-	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::SHINE, true);
-	AddPlane(Vector3(0, 0, 1), 3.0f, Materials::MIRROR, false);
-	AddPlane(Vector3(1, 0, 0), 4.0f, Materials::MIRROR, false);
+//void RayTracer::CornellBox()
+//{
+//	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::WHITE, false);
+//	AddPlane(Vector3(0, 1.0f, 0), -2.0f, Materials::WHITE, false);
+//	AddPlane(Vector3(1, 0, 0), -1.5f, Materials::RED, false);
+//	AddPlane(Vector3(0, 0, -1), 3.0f, Materials::WHITE, false);
+//	AddPlane(Vector3(0, 0, 1), 0.5f, Materials::BLACK, false);
+//	AddPlane(Vector3(-1, 0, 0), -1.5f, Materials::GREEN, false);
+//
+//	AddSphere(Vector3(-0.7f, -0.65f, 1.3f), 0.35f, Materials::COBALT);
+//
+//	AddSphere(Vector3(0.5f, -0.65f, 0.9f), 0.35f, Materials::FUZZYGLASS);
+//
+//	Matrix3 angle; angle.setToRotationY(30);
+//	AddCube(Vector3(0.5f, -1, 2.0f), Vector3(0.4f, 1.8f, 0.4f), angle, Materials::COBALT);
+//
+//	AddRectLight(Point3D(0, 1.7f, 1.3f), Vector2(1.5f, 1.5f), Vector3{ 0,1,0 }, Color{ 3.8f });
+//}
 
-	AddCube(Vector3(-2, 0, 2), Vector3(0.5f, 1, 0.5f), Matrix3().getIdentity(), Materials::FALSEMIRROR);
-
-	Matrix3 angle; angle.setToRotationY(30);
-	AddCube(Vector3(0, 0, 4), Vector3(0.8f, 2, 0.8f), angle, Materials::GLASS);
-	AddCube(Vector3(0, 0.705f, 4), Vector3(0.65f, 1.3f, 0.65f), angle, Materials::WATER);
-	angle.setToIdentity();
-	angle.setToRotationZ(20);
-	AddCube(Vector3(0, 1.2f, 4), Vector3(0.1f, 1.7f, 0.1f), angle, Materials::YELLOW);
-	AddSphere(Vector3(-0.6f, 3.0f, 4), 0.5f, Materials::COBALT);
-	//AddCube(Vector3(-4, 0, 4), Vector3(0.5f, 2, 0.5f), angle, Materials::COBALT);
-
-#if SHOW_SHADOWS 
-	//AddRectLight(Point3D(2, 6, 2), Vector2(5.0f, 5.0f), Vector3{ 2,1,0 }.normalized(), Color{ 60 });
-#endif
-	//CornellBox();
-}
-
-void RayTracer::CornellBox()
-{
-	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::WHITE, false);
-	AddPlane(Vector3(0, 1.0f, 0), -2.0f, Materials::WHITE, false);
-	AddPlane(Vector3(1, 0, 0), -1.5f, Materials::RED, false);
-	AddPlane(Vector3(0, 0, -1), 3.0f, Materials::WHITE, false);
-	AddPlane(Vector3(0, 0, 1), 0.5f, Materials::BLACK, false);
-	AddPlane(Vector3(-1, 0, 0), -1.5f, Materials::GREEN, false);
-
-	AddSphere(Vector3(-0.7f, -0.65f, 1.3f), 0.35f, Materials::COBALT);
-
-	AddSphere(Vector3(0.5f, -0.65f, 0.9f), 0.35f, Materials::FUZZYGLASS);
-
-	Matrix3 angle; angle.setToRotationY(30);
-	AddCube(Vector3(0.5f, -1, 2.0f), Vector3(0.4f, 1.8f, 0.4f), angle, Materials::COBALT);
-
-	AddRectLight(Point3D(0, 1.7f, 1.3f), Vector2(1.5f, 1.5f), Vector3{ 0,1,0 }, Color{ 3.8f });
-}
-
-void RayTracer::AddSphere(Point3D position, float radius, int&& a_Material_Index)
-{
-	m_PrimList[m_PrimIt] = new Sphere(position, radius, &m_MaterialSystem->AssignMaterial(a_Material_Index));
-	m_PrimIt++;
-}
-//Adds an axis aligned bounding box to the scene with a position and a float size.
-void RayTracer::AddCube(SlavMath::Vector3 position, float size, int&& a_Material_Index)
-{
-	m_PrimList[m_PrimIt] = new AxisAlignedBox(position, size, &m_MaterialSystem->AssignMaterial(a_Material_Index));
-	m_PrimIt++;
-}
-//Adds an axis aligned bounding box to the scene with a Vmin and a Vmax.
-void RayTracer::AddCube(SlavMath::Vector3 Vmin, SlavMath::Vector3 Vmax, int&& a_Material_Index)
-{
-	m_PrimList[m_PrimIt] = new AxisAlignedBox(Vmin, Vmax, &m_MaterialSystem->AssignMaterial(a_Material_Index));
-	m_PrimIt++;
-}
-//Adds an orientated bounding box to the scene with a position, a vector size and a model matrix.
-void RayTracer::AddCube(SlavMath::Vector3&& position, SlavMath::Vector3&& size, SlavMath::Matrix3&& modelmatrix, int&& a_Material_Index)
-{
-	m_PrimList[m_PrimIt] = new OrientatedBox(position, size, modelmatrix, &m_MaterialSystem->AssignMaterial(a_Material_Index));
-	m_PrimIt++;
-}
-//Adds an orientated bounding box to the scene with a position, a size and a model matrix.
-void RayTracer::AddCube(SlavMath::Vector3&& position, SlavMath::Vector3&& size, const SlavMath::Matrix3& modelmatrix, int&& a_Material_Index)
-{
-	m_PrimList[m_PrimIt] = new OrientatedBox(position, size, modelmatrix, &m_MaterialSystem->AssignMaterial(a_Material_Index));
-	m_PrimIt++;
-}
-void RayTracer::AddPlane(Vector3 normal, float d, int&& a_Material_Index, const bool& is_Checker)
-{
-	m_PrimList[m_PrimIt] = new Plane(normal, d, &m_MaterialSystem->AssignMaterial(a_Material_Index), is_Checker);
-	m_PrimIt++;
-}
-void RayTracer::AddPointLight(Point3D position, SlavMath::Color&& color)
-{
-	m_LigthList[m_LightIt] = new PointLight(position, color);
-	m_LightIt++;
-}
-void RayTracer::AddRectLight(SlavMath::Point3D position, SlavMath::Vector2 dimensions, SlavMath::Vector3 normal, SlavMath::Color&& color)
-{
-	m_LigthList[m_LightIt] = new RectangleLight(position, dimensions, normal, color);
-	m_LightIt++;
-}
 /*
 * !The right hand rule is used!
 */

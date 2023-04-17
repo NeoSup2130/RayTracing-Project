@@ -1,6 +1,8 @@
 #ifndef __Framework__
 #define __Framework__
 #pragma once
+#include "Scene.h"
+
 struct SDL_Window;
 struct SDL_Texture;
 struct SDL_Renderer;
@@ -38,6 +40,7 @@ private:
 	void Screen_To_Buffer();
 	void SetExit(bool* exit);
 	void ResetAccumulator();
+	void HandleInput();
 private:
 	Tick_Timer m_FrameTimer;
 	MyRandom* m_RNG;
@@ -49,6 +52,7 @@ private:
 
 	Camera* m_Current_Camera;
 	RayTracer* m_RayTracer;
+	Scene m_Scene;
 	bool* m_ExitPtr = nullptr;
 
 	SDL_Window* m_SDL_Window;

@@ -50,6 +50,7 @@ bool Framework::Init(bool* exit)
 
 	printf("SDL initialization completed.\n");
 
+	m_RayTracer->SetScene(&m_Scene.GetScene());
 	m_RayTracer->SetCamera(m_Current_Camera);
 	m_RayTracer->SetScreen(m_Screen);
 	m_RayTracer->SetAccumulator(m_Accumulator);
@@ -89,7 +90,22 @@ void Framework::Update(const float& deltaTime)
 {
 	Screen_To_Buffer();
 	m_RayTracer->Update(deltaTime);
+	HandleInput();
+}
 
+void Framework::SetExit(bool* exit)
+{
+	m_ExitPtr = exit;
+}
+
+void Framework::ResetAccumulator()
+{
+	m_FrameCount = 0;
+	memset(m_Accumulator, 0, sizeof(SlavMath::Vector3) * SCREENHEIGHT * SCREENWIDTH);
+}
+
+void Framework::HandleInput()
+{
 	SDL_Event event;
 	while (SDL_PollEvent(&event))
 	{
@@ -144,17 +160,6 @@ void Framework::Update(const float& deltaTime)
 		//Causes delays whenever input is detected. Therefore, "lag" is caused.
 		//SDL_Delay(16); //Prevents program from sucking up all the CPU time.
 	}
-}
-
-void Framework::SetExit(bool* exit)
-{
-	m_ExitPtr = exit;
-}
-
-void Framework::ResetAccumulator()
-{
-	m_FrameCount = 0;
-	memset(m_Accumulator, 0, sizeof(SlavMath::Vector3) * SCREENHEIGHT * SCREENWIDTH);
 }
 
 Tick_Timer::Tick_Timer()

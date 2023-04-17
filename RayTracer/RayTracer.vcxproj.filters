@@ -1,0 +1,78 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="RayTracer.cpp">
+      <Filter>Ray_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Ray.cpp">
+      <Filter>Ray_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Framework.cpp">
+      <Filter>Core_System</Filter>
+    </ClCompile>
+    <ClCompile Include="main.cpp">
+      <Filter>Core_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Screen.cpp">
+      <Filter>Screen_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Camera.cpp">
+      <Filter>Camera_System</Filter>
+    </ClCompile>
+    <ClCompile Include="precomp.cpp">
+      <Filter>Core_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Primitives.cpp">
+      <Filter>Primitives_System</Filter>
+    </ClCompile>
+    <ClCompile Include="Material.cpp">
+      <Filter>Primitives_System</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="RayTracer.h">
+      <Filter>Ray_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Ray.h">
+      <Filter>Ray_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework.h">
+      <Filter>Core_System</Filter>
+    </ClInclude>
+    <ClInclude Include="main.h">
+      <Filter>Core_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.h">
+      <Filter>Screen_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Camera.h">
+      <Filter>Camera_System</Filter>
+    </ClInclude>
+    <ClInclude Include="precomp.h">
+      <Filter>Core_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Primitives.h">
+      <Filter>Primitives_System</Filter>
+    </ClInclude>
+    <ClInclude Include="Material.h">
+      <Filter>Primitives_System</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Ray_System">
+      <UniqueIdentifier>{2cd55768-956b-43b3-a6ce-a593fceafcc3}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Core_System">
+      <UniqueIdentifier>{8a207010-57f0-40c9-8bf7-1c4b51730d17}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Screen_System">
+      <UniqueIdentifier>{6b1716e7-f406-42b1-8b6f-8e4546b7595e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Camera_System">
+      <UniqueIdentifier>{5202415f-6e75-4aba-bb9c-bc8394bc7551}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Primitives_System">
+      <UniqueIdentifier>{2a9e035e-a445-4e6f-84c8-d593efe89fc9}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

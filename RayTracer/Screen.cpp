@@ -16,8 +16,11 @@ Screen::Screen(int width, int height)
 
 	m_Buffer = new unsigned int[GetSize()];
 
-	for (int i = 0; i < SDL_GetCPUCount(); i++)
-		m_ThreadPool[i] = nullptr;
+	for (size_t i = 0; i < SDL_GetCPUCount(); i++)
+	{
+		m_ThreadPool[i] = SDL_CreateThread(doThreadedTrace, "TracerThread", (void*)&m_WorkQueue);
+		SDL_DetachThread(m_ThreadPool[i]);
+	}
 }
 
 void Screen::Clear() const
@@ -41,18 +44,23 @@ int doThreadedTrace(void* threadQueue)
 	RayTracer tracer;
 	SlavMath::Color result;
 
-	while (!queue.Empty())
+	//While thread queue is alive
+	while (threadQueue)
 	{
-		Screen::traceData data = queue.pop();
+		while (!queue.Empty())
+		{
+			Screen::traceData data = queue.pop();
 
-		tracer.SetScene(&data.scene);
-		tracer.SetRNG(&data.rng);
+			tracer.SetScene(&data.scene);
+			tracer.SetRNG(&data.rng);
 
-		result = tracer.GetPixelColor(data.pos, data.direction);
+			result = tracer.GetPixelColor(data.pos, data.direction);
 
-		SDL_LockMutex(data.mtx);
-		(*data.dest) += result;
-		SDL_UnlockMutex(data.mtx);
+			SDL_LockMutex(data.mtx);
+			(*data.dest) += result;
+			SDL_UnlockMutex(data.mtx);
+		}
+		SDL_Delay(17);
 	}
 	return 0;
 }
@@ -88,12 +96,6 @@ void Screen::Draw()
 			m_WorkQueue.push(data);
 		}
 		buffer += m_Width;
-	}
-
-	for (int i = 0; i < SDL_GetCPUCount(); i++)
-	{
-		m_ThreadPool[i] = SDL_CreateThread(doThreadedTrace, "TracerThread", (void*)&m_WorkQueue);
-		SDL_DetachThread(m_ThreadPool[i]);
 	}
 
 	while (!m_WorkQueue.Empty())

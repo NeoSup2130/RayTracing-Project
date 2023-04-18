@@ -7,7 +7,7 @@
 #define MAX_RAND 0xFFFFFFFF
 #endif
 
-MyRandom::MyRandom(unsigned int& seed)
+MyRandom::MyRandom(unsigned int seed)
     : m_Seed(seed)
 {
 }

@@ -46,6 +46,7 @@
     <ClInclude Include="RayTracer.h" />
     <ClInclude Include="Scene.h" />
     <ClInclude Include="Screen.h" />
+    <ClInclude Include="ThreadSafeQueue.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyMathLibrary\MyMathLibrary.vcxproj">

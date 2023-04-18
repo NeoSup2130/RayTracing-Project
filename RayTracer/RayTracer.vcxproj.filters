@@ -63,6 +63,9 @@
     <ClInclude Include="Scene.h">
       <Filter>Scene</Filter>
     </ClInclude>
+    <ClInclude Include="ThreadSafeQueue.h">
+      <Filter>threading</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="Ray_System">
@@ -82,6 +85,9 @@
     </Filter>
     <Filter Include="Scene">
       <UniqueIdentifier>{96116e1c-2b51-4b87-a7a1-9b27965647ed}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="threading">
+      <UniqueIdentifier>{66433f71-2728-40be-b91f-81a31acb6f9f}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
 </Project>

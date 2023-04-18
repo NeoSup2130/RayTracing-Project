@@ -22,31 +22,25 @@ using namespace SlavMath;
 
 void RayTracer::Init()
 {
-}
+	//float u, v;
+	//size_t it = 0;
+	//m_TablePixels = new SlavMath::Vector2[(size_t)m_Screen->GetSize()];
 
-void RayTracer::SetScreen(Screen* screen)
-{
-	m_Screen = screen;
-}
+	//for (int y = (SCREENHEIGHT - 1); y > -1; y--)
+	//{
+	//	v = (float)y * HeightInverse;
 
-void RayTracer::SetCamera(Camera* camera)
-{
-	m_Camera = camera;
+	//	for (int x = 0; x < SCREENWIDTH; x++)
+	//	{
+	//		u = (float)x * WidthInverse;
+	//		m_TablePixels[it++] = SlavMath::Vector2(u, v);
+	//	}
+	//}
 }
 
 void RayTracer::SetScene(const SceneData* scene)
 {
 	m_Scene = scene;
-}
-
-void RayTracer::SetAccumulator(SlavMath::Vector3* accumulator)
-{
-	m_Accumulator = accumulator;
-}
-
-void RayTracer::SetFrameCounter(int* counter)
-{
-	m_FrameCount = counter;
 }
 
 void RayTracer::SetRNG(MyRandom* rng)
@@ -265,17 +259,6 @@ bool RayTracer::SetRayToRefracted(Ray& a_Ray, const SlavMath::Vector3& a_Normal)
 	return false;
 }
 
-void RayTracer::HandleBufferFilter()
-{
-	Pixel* screen = m_Screen->GetBuffer();
-	(*m_FrameCount)++;
-	float count = 1.0f / (float)(*m_FrameCount);
-	for (size_t i = 0; i < (size_t)m_Screen->GetSize(); i++)
-	{
-		screen[i] = getVectorColor(m_Accumulator[i] * count);
-	}
-}
-
 //void RayTracer::SceneCreation()
 //{
 //	AddSphere(Vector3(0, 0, 0), 50.0f, Materials::CYAN);
@@ -338,54 +321,27 @@ void RayTracer::Update(const float& deltaTime)
 		m_Screen->GetBuffer()[(size_t)u + (size_t)v * (size_t)SCREENWIDTH] = 0x00FFF0;
 	}
 #else
-	float u, v;
-	Color color;
-	Color emittance;
-#if USE_ACCUMULATOR
-	Color* buffer = m_Accumulator;
-#else
-	Pixel* address = m_Screen->GetBuffer();
-#endif
+	//Color* buffer = m_Accumulator;
 
-	for (int y = (SCREENHEIGHT - 1); y > -1; y--)
-	{
-		v = (float)y * HeightInverse;
+	//for (size_t MAX = m_Screen->GetSize(), i = 0; i < MAX; i++)
+	//{
+	//	buffer[i] += GetPixelColor(m_Camera->GetPosition(), m_Camera->GetRayDirection(
+	//		m_TablePixels[i].x + m_Generator->GetAFloatBetween(0.01f, 0.015f),
+	//		m_TablePixels[i].y + m_Generator->GetAFloatBetween(0.01f, 0.015f)
+	//	));
+	//}
+	//HandleBufferFilter();
+	//printf("Update deltaTime: %fs\n", deltaTime);
+#endif
+}
 
-		for (int x = 0; x < SCREENWIDTH; x++)
-		{
-			u = (float)x * WidthInverse;
-#if USE_ACCUMULATOR
-			m_PrimaryRay.Init(
-				m_Camera->GetPosition(),
-				m_Camera->GetRayDirection(
-					u + m_Generator->GetAFloatBetween(0.01f, 0.015f),
-					v + m_Generator->GetAFloatBetween(0.01f, 0.015f)
-				)
-			);
-#else
-			m_PrimaryRay.Init(
-				m_Camera->GetPosition(),
-				m_Camera->GetRayDirection(
-					u,
-					v
-				)
-			);
-#endif
-			CastRay(m_PrimaryRay);
+SlavMath::Color RayTracer::GetPixelColor(SlavMath::Vector3 pos, SlavMath::Vector3 rayDir)
+{
+	Color color, emittance;
 
-			Trace(m_PrimaryRay, color, emittance);
-#if USE_ACCUMULATOR
-			buffer[x] += color;
-		}
-		buffer += SCREENWIDTH;
-	}
-	HandleBufferFilter();
-#else
-			address[x] = getVectorColor(color);
-		}
-		address += SCREENWIDTH;
-	}
-#endif
-	printf("Update deltaTime: %fs\n", deltaTime);
-#endif
+	m_PrimaryRay.Init(pos, rayDir);
+	CastRay(m_PrimaryRay);
+	Trace(m_PrimaryRay, color, emittance);
+
+	return color;
 }

@@ -50,11 +50,10 @@ bool Framework::Init(bool* exit)
 
 	printf("SDL initialization completed.\n");
 
-	m_RayTracer->SetScene(&m_Scene.GetScene());
-	m_RayTracer->SetCamera(m_Current_Camera);
-	m_RayTracer->SetScreen(m_Screen);
-	m_RayTracer->SetAccumulator(m_Accumulator);
-	m_RayTracer->SetFrameCounter(&m_FrameCount);
+	m_Screen->SetCamera(m_Current_Camera);
+	m_Screen->SetScene(&m_Scene);
+	m_Screen->SetAccumulator(m_Accumulator, &m_FrameCount);
+
 	m_RayTracer->SetRNG(m_RNG);
 	m_RayTracer->Init();
 
@@ -89,8 +88,9 @@ void Framework::Screen_To_Buffer()
 void Framework::Update(const float& deltaTime)
 {
 	Screen_To_Buffer();
-	m_RayTracer->Update(deltaTime);
+	m_Screen->Draw();
 	HandleInput();
+	printf("Update deltaTime: %fs\n", deltaTime);
 }
 
 void Framework::SetExit(bool* exit)

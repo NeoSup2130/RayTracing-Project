@@ -13,12 +13,9 @@ class RayTracer
 {
 public:
 	void Update(const float& deltaTime);
+	SlavMath::Color GetPixelColor(SlavMath::Vector3 pos, SlavMath::Vector3 rayDir);
 	void Init();
-	void SetScreen(Screen* screen);
-	void SetCamera(Camera* camera);
 	void SetScene(const SceneData* scene);
-	void SetAccumulator(SlavMath::Vector3* accumulator);
-	void SetFrameCounter(int* counter);
 	void SetRNG(MyRandom* rng);
 private:
 	void CastRay(Ray& a_Ray);
@@ -38,12 +35,6 @@ private:
 	float m_NdotL = 0;
 	float m_RayDistance = 0;
 private:
-	void HandleBufferFilter();
-private:
-	Screen* m_Screen = nullptr;
-	Camera* m_Camera = nullptr;
-	SlavMath::Vector3* m_Accumulator = nullptr;
-	int* m_FrameCount = nullptr;
 	MyRandom* m_Generator = nullptr;
 	const SceneData* m_Scene;
 };

@@ -11,7 +11,7 @@ Camera::Camera()
 	m_Corners[3] = m_Corners[1] - m_Corners[0] + m_Corners[2];
 }
 
-SlavMath::Vector3 Camera::GetRayDirection(const float&  u, const float&  v)
+SlavMath::Vector3 Camera::GetRayDirection(const float&  u, const float&  v) const
 {
 	Vector3 point = m_Corners[0] + u * (m_Corners[1] - m_Corners[0]) + v * (m_Corners[2] - m_Corners[0]) - m_Eye;
 	point.normalize();

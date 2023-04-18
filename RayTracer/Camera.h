@@ -8,7 +8,7 @@ class Camera
 public:
 	Camera();
 	//U and V between [0,1]. U ^= x / image width and V ^= y / image height.
-	SlavMath::Vector3 GetRayDirection(const float& u, const float& v);
+	SlavMath::Vector3 GetRayDirection(const float& u, const float& v) const;
 	const SlavMath::Vector3& GetPosition() const;
 	void MoveSideWays(const float& direction);
 	void MoveBackForth(const float& direction);

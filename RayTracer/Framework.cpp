@@ -67,8 +67,9 @@ void Framework::Start_Tick()
 
 float Framework::Get_Delta_Time()
 {
-	m_FrameTimer.NOW = SDL_GetTicks();
-	return static_cast<float>(m_FrameTimer.NOW - m_FrameTimer.LAST) / SEC;
+	m_FrameTimer.NOW = SDL_GetPerformanceCounter();
+	float delta = static_cast<float>(m_FrameTimer.NOW - m_FrameTimer.LAST);
+	return delta / static_cast<float>(SDL_GetPerformanceFrequency());
 }
 
 void Framework::Screen_To_Buffer()

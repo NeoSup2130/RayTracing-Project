@@ -15,7 +15,7 @@ class MyRandom;
 struct Tick_Timer
 {
 	Tick_Timer();
-	Uint32 NOW, LAST;
+	Uint64 NOW, LAST;
 };
 
 struct Performance_TImer

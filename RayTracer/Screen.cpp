@@ -4,21 +4,28 @@
 #include "Scene.h"
 #include "Screen.h"
 #include <SDL_thread.h>
-#include <ctime>
+
 
 Screen::Screen(int width, int height)
-	: m_Width(width), m_Height(height), RNG(0), m_ThreadPool(new SDL_Thread* [SDL_GetCPUCount()])
+	: m_Width(width), m_Height(height), m_ThreadPool(new SDL_Thread* [SDL_GetCPUCount()])
 {
-	time_t now = time(NULL);
-	tm timestruct; gmtime_s(&timestruct, &now);
-	MyRandom temp(timestruct.tm_sec + timestruct.tm_min);
-	RNG = temp;
-
 	m_Buffer = new unsigned int[GetSize()];
+}
 
-	for (size_t i = 0; i < SDL_GetCPUCount(); i++)
+Screen::~Screen()
+{
+	if (m_ThreadPool)
 	{
-		m_ThreadPool[i] = SDL_CreateThread(doThreadedTrace, "TracerThread", (void*)&m_WorkQueue);
+		delete[] m_ThreadPool;
+	}
+}
+
+void Screen::Init()
+{
+	// Create worker threads to do ray tracing
+	for (size_t i = 0, max = SDL_GetCPUCount(); i < max; i++)
+	{
+		m_ThreadPool[i] = SDL_CreateThread(doThreadedTrace, "TracerThread", (void*)this);
 		SDL_DetachThread(m_ThreadPool[i]);
 	}
 }
@@ -38,36 +45,37 @@ const int Screen::GetSize() const
 	return m_Height * m_Width;
 }
 
-int doThreadedTrace(void* threadQueue)
+int doThreadedTrace(void* owner)
 {
-	ThreadSafeQueue<Screen::traceData>& queue = *(reinterpret_cast<ThreadSafeQueue<Screen::traceData>*>(threadQueue));
+	Screen* screen = reinterpret_cast<Screen*>(owner);
+	ThreadSafeQueue<Screen::traceData>& taskQueue =	screen->GetTaskQueue();
 	RayTracer tracer;
+	MyRandom RNG;
+	tracer.SetScene(&screen->GetScene().GetScene());
+	tracer.SetRNG(&RNG);
+
 	SlavMath::Color result;
 
+	size_t i = 0, input = 0;
+	const size_t maxData = 16;
+
+	Screen::traceData dataPack[maxData];
+
 	//While thread queue is alive
-	while (threadQueue)
+	while (screen)
 	{
-		while (!queue.Empty())
+		while (screen->IsTaskQueueReady())
 		{
-			Screen::traceData data = queue.pop();
-
-			tracer.SetScene(&data.scene);
-			tracer.SetRNG(&data.rng);
-
-			result = tracer.GetPixelColor(data.pos, data.direction);
-
-			SDL_LockMutex(data.mtx);
-			(*data.dest) += result;
-			SDL_UnlockMutex(data.mtx);
+			taskQueue.popN(maxData, input, dataPack);
+			for (i = 0; i < input; i++)
+			{
+				result = tracer.GetPixelColor(dataPack[i].pos, dataPack[i].direction);
+				screen->GetBufferIndex(dataPack[i].dest) += result;
+			}
 		}
 		SDL_Delay(17);
 	}
 	return 0;
-}
-
-Screen::traceData CreateTraceData(SDL_mutex* mtx, const SceneData& scene, MyRandom& rng, SlavMath::Vector3* dest, SlavMath::Vector3 pos, SlavMath::Vector3 direction)
-{
-	return Screen::traceData(mtx, scene, rng, dest, pos, direction);
 }
 
 void Screen::Draw()
@@ -77,11 +85,9 @@ void Screen::Draw()
 	float u, v;
 	const float HeightInverse = 1.0f / m_Height, WidthInverse = 1.0f / m_Height;
 
-	SlavMath::Vector3* buffer = m_Accumulator;
-	SDL_mutex* mtx = SDL_CreateMutex();
+	m_TasksReady = false;
 
-
-	for (int y = (m_Height - 1); y > -1; y--)
+	for (int start = m_Height - 1,  y = start; y > -1; y--)
 	{
 		v = (float)y * HeightInverse;
 
@@ -89,15 +95,17 @@ void Screen::Draw()
 		{
 			u = (float)x * WidthInverse;
 
-			traceData data = CreateTraceData(mtx, m_Scene->GetScene(), RNG, &buffer[x], camPos, m_Camera->GetRayDirection(
-				u + RNG.GetAFloatBetween(0.01f, 0.015f),
-				v + RNG.GetAFloatBetween(0.01f, 0.015f)));
-			
-			m_WorkQueue.push(data);
+			// Calculate buffer index with "x + (start - y) * m_Width" since y start at max height
+			m_WorkQueue.push({ static_cast<unsigned int>(x + (start - y) * m_Width), 
+				camPos, m_Camera->GetRayDirection(
+				u + m_RNG.GetAFloatBetween(0.001f, 0.0005f),
+				v + m_RNG.GetAFloatBetween(0.001f, 0.0005f))});
 		}
-		buffer += m_Width;
 	}
 
+	m_TasksReady = true;
+
+	// Wait while worker threads ray trace our data
 	while (!m_WorkQueue.Empty())
 	{
 		SDL_Delay(10);

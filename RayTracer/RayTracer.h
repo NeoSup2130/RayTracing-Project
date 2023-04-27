@@ -32,6 +32,7 @@ private:
 	Ray m_RefractedRay; 
 	SlavMath::Point3D m_HitPoint;
 	SlavMath::Vector3 m_Direction, m_Length;
+	SlavMath::Color m_Color, m_Emittance;
 	float m_NdotL = 0;
 	float m_RayDistance = 0;
 private:

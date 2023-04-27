@@ -69,9 +69,10 @@ void RayTracer::Trace(Ray& a_Ray, SlavMath::Color& a_Color, SlavMath::Color& a_E
 #if SHOW_NORMAL_COLORS
 	a_Color = a_Ray.GetObject()->GetNormal(a_Ray);
 #else
-	a_Ray.GetObject()->GetColorAtPoint(a_Ray.At(a_Ray.GetRecordT()), a_Color);
+	const Primitives* hitObj = a_Ray.GetObject();
+	hitObj->GetColorAtPoint(a_Ray.At(a_Ray.GetRecordT()), a_Color);
 #endif
-	if (a_Ray.GetObject()->IsDieletric() && recur < MaxRecursion) // Object is a dieletric
+	if (hitObj->IsDieletric() && recur < MaxRecursion) // Object is a dieletric
 	{
 		// Set a ray refracted --> Refracted ray
 		// Set a ray reflected --> Primary ray
@@ -122,16 +123,16 @@ void RayTracer::Trace(Ray& a_Ray, SlavMath::Color& a_Color, SlavMath::Color& a_E
 		}
 
 	}
-	else if (a_Ray.GetObject()->IsReflective() && recur < MaxRecursion) // Object is reflective
+	else if (hitObj->IsReflective() && recur < MaxRecursion) // Object is reflective
 	{
 		Color objectColor = a_Color;
 		Color objectEmitt = 0;
-		const float reflect = a_Ray.GetObject()->GetReflectivity();
+		const float reflect = hitObj->GetReflectivity();
 
 		if (1.0f - reflect > 0)
 			Illumination(a_Ray, objectEmitt);
 
-		SetRayToReflected(a_Ray, a_Ray.GetObject()->GetNormal(a_Ray));
+		SetRayToReflected(a_Ray, hitObj->GetNormal(a_Ray));
 		CastRay(a_Ray); 
 		Trace(a_Ray, a_Color, a_Emittance, ++recur);
 
@@ -337,11 +338,8 @@ void RayTracer::Update(const float& deltaTime)
 
 SlavMath::Color RayTracer::GetPixelColor(SlavMath::Vector3 pos, SlavMath::Vector3 rayDir)
 {
-	Color color, emittance;
-
 	m_PrimaryRay.Init(pos, rayDir);
 	CastRay(m_PrimaryRay);
-	Trace(m_PrimaryRay, color, emittance);
-
-	return color;
+	Trace(m_PrimaryRay, m_Color, m_Emittance);
+	return m_Color;
 }

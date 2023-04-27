@@ -13,46 +13,55 @@ class Screen
 public:
 	struct traceData
 	{
-		traceData(SDL_mutex* mtx, const SceneData& scene, MyRandom& rng, SlavMath::Vector3* dest, SlavMath::Vector3 pos, SlavMath::Vector3 direction)
-			: mtx(mtx), scene(scene), rng(rng), dest(dest), pos(pos), direction(direction) {};
+		traceData() = default;
+		traceData(unsigned int dest, SlavMath::Vector3 pos, SlavMath::Vector3 direction)
+			: dest(dest), pos(pos), direction(direction) {};
 		~traceData() = default;
 
-		SDL_mutex* mtx;
-		const SceneData& scene;
-		MyRandom& rng;
-		SlavMath::Vector3* dest;
 		SlavMath::Vector3 pos;
 		SlavMath::Vector3 direction;
+		unsigned int dest;
 	};
 
 public:
 	Screen(int width, int height);
+	~Screen();
+
+	void Init();
 	void Clear() const;
 	unsigned int* GetBuffer();
 	const int GetSize() const;
 	void Draw();
+
 	void SetCamera(const Camera* camera);
 	void SetScene(const Scene* scene);
 	void SetAccumulator(SlavMath::Vector3* accumulator, int* frameCount);
+
+	SlavMath::Vector3& GetBufferIndex(unsigned int handle) { return m_Accumulator[handle]; };
+	ThreadSafeQueue<traceData>& GetTaskQueue() { return m_WorkQueue; };
+	const Scene& GetScene() { return *m_Scene; };
+	bool IsTaskQueueReady() const { return m_TasksReady; };
 private:
 	void HandleBuffer();
 private:
-	int m_Width = 0, m_Height = 0;
-	MyRandom RNG;
+	ThreadSafeQueue<traceData> m_WorkQueue;
 
-	int* m_FrameCount = nullptr;
-	unsigned int* m_Buffer = nullptr;
 	SlavMath::Vector3* m_Accumulator = nullptr;
+	int* m_FrameCount = nullptr;
+
+	unsigned int* m_Buffer = nullptr;
+
 	const Camera* m_Camera = nullptr;
 	const Scene* m_Scene = nullptr;
-
+	
 	SDL_Thread** m_ThreadPool = nullptr;
-	ThreadSafeQueue<traceData> m_WorkQueue;
+	MyRandom m_RNG;
+
+	int m_Width = 0, m_Height = 0;
+	bool m_TasksReady = false;
 };
 
 int doThreadedTrace(void* traceData);
-
-Screen::traceData CreateTraceData(SDL_mutex* mtx, const SceneData& scene, MyRandom& rng, SlavMath::Vector3* dest, SlavMath::Vector3 pos, SlavMath::Vector3 direction);
 
 #define __MY_SCREEN_RAY__
 #endif // !__MY_SCREEN_RAY__

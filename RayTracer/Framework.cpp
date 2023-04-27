@@ -53,9 +53,7 @@ bool Framework::Init(bool* exit)
 	m_Screen->SetCamera(m_Current_Camera);
 	m_Screen->SetScene(&m_Scene);
 	m_Screen->SetAccumulator(m_Accumulator, &m_FrameCount);
-
-	m_RayTracer->SetRNG(m_RNG);
-	m_RayTracer->Init();
+	m_Screen->Init();
 
 	return true;
 }

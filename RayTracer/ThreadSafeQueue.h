@@ -18,7 +18,8 @@ class ThreadSafeQueue
         std::queue<T>& GetQueue() { return workQueue; };
 
         void push(T job);
-        T pop(void);
+        T pop();
+        void popN(size_t n, size_t& out, T* dest);
 
         bool Empty() const;
 private:
@@ -66,7 +67,7 @@ void ThreadSafeQueue<T>::push(T job)
 }
 
 template <class T>
-T ThreadSafeQueue<T>::pop(void)
+T ThreadSafeQueue<T>::pop()
 {
     SDL_LockMutex(lock);
     while(workQueue.empty())
@@ -76,6 +77,38 @@ T ThreadSafeQueue<T>::pop(void)
     SDL_UnlockMutex(lock);
 
     return top;
+}
+
+template<class T>
+inline void ThreadSafeQueue<T>::popN(size_t n, size_t& out, T* dest)
+{
+    SDL_LockMutex(lock);
+
+    while (workQueue.empty())
+        SDL_CondWait(available, lock);
+
+    if (workQueue.size() < n)
+    {
+        size_t max = workQueue.size();
+        // Our output is what we have in queue
+        out = max;
+        for (size_t i = 0; i < max; i++)
+        {
+            dest[i] = workQueue.front();
+            workQueue.pop();
+        }
+    }
+    else
+    {
+        // Our output is the same as input
+        out = n;
+        for (size_t i = 0; i < n; i++)
+        {
+            dest[i] = workQueue.front();
+            workQueue.pop();
+        }
+    }
+    SDL_UnlockMutex(lock);
 }
 
 #endif

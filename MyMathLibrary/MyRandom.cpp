@@ -1,4 +1,5 @@
 #include "MyRandom.h"
+#include <ctime>
 
 #define FAST_RAND false
 #if FAST_RAND
@@ -6,6 +7,13 @@
 #else
 #define MAX_RAND 0xFFFFFFFF
 #endif
+
+MyRandom::MyRandom() : m_Seed(0)
+{
+    time_t now = time(NULL);
+    tm timestruct; gmtime_s(&timestruct, &now);
+    m_Seed = static_cast<unsigned int>(timestruct.tm_sec + timestruct.tm_min);
+}
 
 MyRandom::MyRandom(unsigned int seed)
     : m_Seed(seed)

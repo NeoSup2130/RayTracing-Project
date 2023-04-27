@@ -2,6 +2,7 @@
 class MyRandom
 {
 public:
+	MyRandom();
 	MyRandom(unsigned int seed);
 	unsigned int xorshift32();
 	float GetAFloatBetween(const float& min, const float& max);

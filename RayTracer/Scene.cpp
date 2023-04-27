@@ -70,10 +70,9 @@ Scene::~Scene()
 void Scene::CreateBasicScene()
 {
 	AddSphere(Vector3(0, 0, 0), 50.0f, Materials::CYAN);
-	AddRectLight(Point3D(0, 25.0f, 0), Vector2(10, 10), Vector3{ 0,1,0 }, Color{ 1500 });
-	AddRectLight(Point3D(0, 20.0f, -20), Vector2(10, 10), Vector3{ 0,0,1 }, Color{ 1000 });
+	AddRectLight(Point3D(0, 25.0f, 0), Vector2(10, 10), Vector3{ 0,1,0 }, Color{ 1200 });
 	
-	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::SHINE, true);
+	AddPlane(Vector3(0, 1.0f, 0), 1.0f, Materials::WHITE, true);
 	AddPlane(Vector3(0, 0, 1), 3.0f, Materials::MIRROR, false);
 	AddPlane(Vector3(1, 0, 0), 4.0f, Materials::MIRROR, false);
 	
